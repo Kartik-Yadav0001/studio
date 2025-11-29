@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { getRecommendedThreads } from '@/app/actions';
 import {
   Card,
@@ -34,7 +35,7 @@ function SubmitButton() {
 }
 
 export function AiOptimizer() {
-  const [state, formAction] = useFormState(getRecommendedThreads, initialState);
+  const [state, formAction] = useActionState(getRecommendedThreads, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
