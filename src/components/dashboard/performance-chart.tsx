@@ -34,10 +34,10 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
         <CardHeader>
             <CardTitle className="flex items-center gap-2">
                 <Activity/>
-                Real-time Performance
+                System Performance
             </CardTitle>
             <CardDescription>
-                Simulated CPU and memory usage over time.
+                Real-time simulated CPU and memory usage based on thread activity.
             </CardDescription>
         </CardHeader>
         <CardContent>

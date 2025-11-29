@@ -106,7 +106,7 @@ export function AiOptimizer({
           Intelligent Thread Count Optimizer
         </CardTitle>
         <CardDescription>
-          Use GenAI to recommend the optimal thread count based on live simulation data.
+          Leverage generative AI to recommend an optimal thread count based on real-time simulation data and workload characteristics.
         </CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>
@@ -115,7 +115,7 @@ export function AiOptimizer({
           <input type="hidden" name="currentUsageMetrics" value={currentMetricsString} />
           
           <div className="sm:col-span-3 space-y-2">
-            <Label htmlFor="applicationNeeds">Application Needs</Label>
+            <Label htmlFor="applicationNeeds">Application Workload Profile</Label>
             <Textarea
               id="applicationNeeds"
               name="applicationNeeds"

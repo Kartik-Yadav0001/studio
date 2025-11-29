@@ -32,7 +32,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
             <SlidersHorizontal />
             Simulation Controls
         </CardTitle>
-        <CardDescription>Adjust parameters and control the simulation.</CardDescription>
+        <CardDescription>Adjust workload parameters and control the simulation.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 pt-2">
         <div className="flex gap-2">
@@ -72,7 +72,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
               />
           </div>
           <div className="space-y-3">
-              <Label htmlFor="resourceCount">Resources ({config.resourceCount})</Label>
+              <Label htmlFor="resourceCount">Shared Resources ({config.resourceCount})</Label>
               <Slider 
                   id="resourceCount"
                   min={0} max={10} step={1} 
@@ -82,7 +82,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
               />
           </div>
           <div className="space-y-3">
-              <Label htmlFor="simulationSpeed">Sim Speed ({config.simulationSpeed}ms tick)</Label>
+              <Label htmlFor="simulationSpeed">Simulation Speed ({config.simulationSpeed}ms tick)</Label>
               <Slider 
                   id="simulationSpeed"
                   min={50} max={1000} step={50}

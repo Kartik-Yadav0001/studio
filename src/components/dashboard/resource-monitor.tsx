@@ -14,9 +14,9 @@ export function ResourceMonitor({ resources }: ResourceMonitorProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
             <Server />
-            Shared Resources
+            Shared Resource Locks
         </CardTitle>
-        <CardDescription>Mutex lock status on shared resources.</CardDescription>
+        <CardDescription>Synchronization status of mutex locks on shared resources.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {resources.map((resource) => (
@@ -39,7 +39,7 @@ export function ResourceMonitor({ resources }: ResourceMonitorProps) {
             )}
           </div>
         ))}
-         {resources.length === 0 && <p className="text-sm text-muted-foreground text-center">No resources configured.</p>}
+         {resources.length === 0 && <p className="text-sm text-muted-foreground text-center">No shared resources configured.</p>}
       </CardContent>
     </Card>
   );
