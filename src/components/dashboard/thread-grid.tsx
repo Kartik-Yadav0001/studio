@@ -12,7 +12,7 @@ const statusConfig: Record<
 > = {
   idle: { label: 'Idle', icon: Circle, color: 'text-muted-foreground/60' },
   running: { label: 'Running', icon: Loader, color: 'text-primary animate-spin' },
-  waiting: { label: 'Waiting', icon: PauseCircle, color: 'text-chart-4' },
+  waiting: { label: 'Waiting', icon: PauseCircle, color: 'text-yellow-400' },
 };
 
 function ThreadVisual({ thread }: { thread: Thread }) {
@@ -21,7 +21,7 @@ function ThreadVisual({ thread }: { thread: Thread }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="relative flex flex-col items-center justify-center aspect-square rounded-lg bg-card-foreground/5 dark:bg-card-foreground/10 border border-transparent hover:border-primary/50 transition-colors duration-300">
+        <div className="relative flex flex-col items-center justify-center aspect-square rounded-lg bg-secondary/50 border border-transparent hover:border-primary/50 transition-colors duration-300">
             <Icon className={`h-6 w-6 ${status.color}`} />
             <span className="absolute top-0 right-1 text-[10px] text-muted-foreground">{thread.id}</span>
             {thread.status === 'running' && thread.progress > 0 && (
@@ -56,14 +56,23 @@ export function ThreadGrid({ threads }: ThreadGridProps) {
     <Card>
         <CardHeader>
             <CardTitle className="flex items-center gap-2">
-                <Cpu className="text-primary"/>
+                <Cpu/>
                 Thread Pool Activity
             </CardTitle>
-            <CardDescription className='flex gap-4'>
+            <CardDescription className='flex flex-wrap gap-x-4 gap-y-1'>
                 <span>Total: <span className="font-semibold text-foreground">{threads.length}</span></span>
-                <span>Running: <span className="text-primary font-semibold">{summary.running}</span></span>
-                <span>Waiting: <span className="text-chart-4 font-semibold">{summary.waiting}</span></span>
-                <span>Idle: <span className="text-muted-foreground font-semibold">{summary.idle}</span></span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                  Running: <span className="text-primary font-semibold">{summary.running}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-yellow-400" />
+                  Waiting: <span className="text-yellow-400 font-semibold">{summary.waiting}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-muted-foreground/60" />
+                  Idle: <span className="text-muted-foreground font-semibold">{summary.idle}</span>
+                </span>
             </CardDescription>
         </CardHeader>
         <CardContent>

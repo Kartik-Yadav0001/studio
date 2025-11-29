@@ -29,7 +29,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-            <SlidersHorizontal className="text-primary"/>
+            <SlidersHorizontal />
             Simulation Controls
         </CardTitle>
         <CardDescription>Adjust parameters and control the simulation.</CardDescription>

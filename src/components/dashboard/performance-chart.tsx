@@ -20,7 +20,7 @@ const chartConfig = {
   },
   memoryUsage: {
     label: 'Memory',
-    color: 'hsl(var(--accent))',
+    color: 'hsl(var(--chart-2))',
   },
 } satisfies ChartConfig;
 
@@ -33,7 +33,7 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
     <Card>
         <CardHeader>
             <CardTitle className="flex items-center gap-2">
-                <Activity className="text-primary"/>
+                <Activity/>
                 Real-time Performance
             </CardTitle>
             <CardDescription>

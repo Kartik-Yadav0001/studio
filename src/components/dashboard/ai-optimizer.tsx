@@ -102,7 +102,7 @@ export function AiOptimizer({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <BrainCircuit className="text-primary" />
+          <BrainCircuit />
           Intelligent Thread Count Optimizer
         </CardTitle>
         <CardDescription>
@@ -120,7 +120,7 @@ export function AiOptimizer({
               id="applicationNeeds"
               name="applicationNeeds"
               placeholder="e.g., Real-time data processing, low latency is critical. Primarily CPU-bound tasks."
-              className="min-h-[100px]"
+              className="min-h-[100px] bg-background/50"
               defaultValue="This is a general purpose server handling mixed workloads, including I/O-bound and CPU-bound tasks. The goal is to maximize task throughput while maintaining reasonable resource utilization and responsiveness."
             />
             {state.errors?.applicationNeeds && <p className="text-sm font-medium text-destructive">{state.errors.applicationNeeds[0]}</p>}
@@ -130,14 +130,14 @@ export function AiOptimizer({
             <SubmitButton />
           
             {state.data && (
-                <Alert className="max-w-md">
+                <Alert className="max-w-md bg-background/50">
                     <Cpu className="h-4 w-4" />
                     <AlertTitle>Optimization Recommendation</AlertTitle>
                     <AlertDescription className="space-y-4">
                         <div>
                             <p className="text-sm text-muted-foreground">The AI recommends</p>
                             <p>
-                                <span className="text-4xl font-bold text-accent">{state.data.recommendedThreadCount}</span>
+                                <span className="text-4xl font-bold text-primary">{state.data.recommendedThreadCount}</span>
                                 <span className="text-2xl font-medium text-muted-foreground"> Threads</span>
                             </p>
                         </div>
