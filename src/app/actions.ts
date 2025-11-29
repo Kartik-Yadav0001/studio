@@ -4,8 +4,8 @@ import { intelligentThreadCountAdjustment } from '@/ai/flows/intelligent-thread-
 import { z } from 'zod';
 
 const formSchema = z.object({
-  historicalLoadData: z.string().min(10, 'Please provide more detailed historical data.'),
-  currentUsageMetrics: z.string().min(10, 'Please provide more detailed current metrics.'),
+  historicalLoadData: z.string().min(1, 'Please provide more detailed historical data.'),
+  currentUsageMetrics: z.string().min(1, 'Please provide more detailed current metrics.'),
   applicationNeeds: z.string().min(10, 'Please describe application needs in more detail.'),
 });
 

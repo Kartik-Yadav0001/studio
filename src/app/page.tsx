@@ -219,7 +219,11 @@ export default function Home() {
             <ThreadGrid threads={threads} />
           </div>
           <div className="lg:col-span-4">
-            <AiOptimizer />
+             <AiOptimizer 
+              performanceHistory={performanceHistory} 
+              threads={threads}
+              onApplyRecommendation={(threadCount: number) => handleUpdateConfig('threadCount', threadCount)}
+             />
           </div>
         </div>
       </main>
