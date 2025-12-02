@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import type { Thread, ThreadStatus } from '@/lib/types';
+import type { Thread, ThreadStatus, Task, TaskPriority } from '@/lib/types';
 import { Circle, Cpu, Loader, PauseCircle } from 'lucide-react';
 import { Progress } from '../ui/progress';
 
@@ -15,13 +15,21 @@ const statusConfig: Record<
   waiting: { label: 'Waiting', icon: PauseCircle, color: 'text-yellow-400' },
 };
 
-function ThreadVisual({ thread }: { thread: Thread }) {
+const priorityColors: Record<TaskPriority, string> = {
+  High: 'border-red-400/80',
+  Medium: 'border-yellow-400/80',
+  Low: 'border-sky-400/80',
+};
+
+function ThreadVisual({ thread, task }: { thread: Thread; task: Task | undefined }) {
   const status = statusConfig[thread.status];
   const Icon = status.icon;
+  const borderColor = task ? priorityColors[task.priority] : 'border-transparent';
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="relative flex flex-col items-center justify-center aspect-square rounded-lg bg-secondary/50 border border-transparent hover:border-primary/50 transition-colors duration-300">
+        <div className={`relative flex flex-col items-center justify-center aspect-square rounded-lg bg-secondary/50 border-2 ${borderColor} hover:bg-secondary transition-colors duration-300`}>
             <Icon className={`h-6 w-6 ${status.color}`} />
             <span className="absolute top-0 right-1 text-[10px] text-muted-foreground">{thread.id}</span>
             {thread.status === 'running' && thread.progress > 0 && (
@@ -32,7 +40,8 @@ function ThreadVisual({ thread }: { thread: Thread }) {
       <TooltipContent>
         <p>Thread ID: {thread.id}</p>
         <p>Status: <span className="font-semibold">{status.label}</span></p>
-        {thread.currentTaskId !== null && <p>Task ID: {thread.currentTaskId}</p>}
+        {task && <p>Task ID: {task.id}</p>}
+        {task && <p>Task Priority: {task.priority}</p>}
         {thread.status === 'running' && <p>Progress: {thread.progress.toFixed(0)}%</p>}
       </TooltipContent>
     </Tooltip>
@@ -41,9 +50,10 @@ function ThreadVisual({ thread }: { thread: Thread }) {
 
 interface ThreadGridProps {
   threads: Thread[];
+  tasks: Task[];
 }
 
-export function ThreadGrid({ threads }: ThreadGridProps) {
+export function ThreadGrid({ threads, tasks }: ThreadGridProps) {
   const summary = threads.reduce(
     (acc, thread) => {
       acc[thread.status]++;
@@ -51,6 +61,8 @@ export function ThreadGrid({ threads }: ThreadGridProps) {
     },
     { idle: 0, running: 0, waiting: 0 } as Record<ThreadStatus, number>
   );
+
+  const taskMap = new Map(tasks.map(task => [task.id, task]));
 
   return (
     <Card>
@@ -79,7 +91,7 @@ export function ThreadGrid({ threads }: ThreadGridProps) {
             <TooltipProvider delayDuration={100}>
                 <div className="grid grid-cols-10 sm:grid-cols-12 md:grid-cols-16 lg:grid-cols-20 gap-2">
                     {threads.map((thread) => (
-                        <ThreadVisual key={thread.id} thread={thread} />
+                        <ThreadVisual key={thread.id} thread={thread} task={thread.currentTaskId ? taskMap.get(thread.currentTaskId) : undefined} />
                     ))}
                 </div>
             </TooltipProvider>

@@ -1,4 +1,5 @@
 export type ThreadStatus = 'idle' | 'running' | 'waiting';
+export type TaskPriority = 'High' | 'Medium' | 'Low';
 
 export interface Thread {
   id: number;
@@ -12,6 +13,7 @@ export interface Task {
   duration: number;
   remaining: number;
   resourceId: string | null;
+  priority: TaskPriority;
 }
 
 export interface Resource {
@@ -25,4 +27,11 @@ export interface PerformanceDataPoint {
   cpuUsage: number;
   memoryUsage: number;
   completedTasks: number;
+}
+
+export interface LogEntry {
+  id: number;
+  timestamp: string;
+  message: string;
+  type: 'info' | 'warning' | 'success';
 }

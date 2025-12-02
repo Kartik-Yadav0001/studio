@@ -6,24 +6,29 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import type { SimulationStatus } from "@/app/page";
 import { Pause, Play, SlidersHorizontal, Square } from "lucide-react";
+import type { SimulationConfig } from "@/app/page";
+
 
 interface ControlsProps {
   status: SimulationStatus;
   onStart: () => void;
   onStop: () => void;
   onPause: () => void;
-  onStep: () => void;
-  onUpdateConfig: (key: 'threadCount' | 'taskCount' | 'resourceCount' | 'simulationSpeed', value: number) => void;
-  config: {
-    threadCount: number;
-    taskCount: number;
-    resourceCount: number;
-    simulationSpeed: number;
-  };
+  onUpdateConfig: <K extends keyof SimulationConfig>(key: K, value: SimulationConfig[K]) => void;
+  config: SimulationConfig;
 }
 
 export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, config }: ControlsProps) {
   const isRunning = status === 'running';
+
+  const handlePriorityChange = (newPriorities: number[]) => {
+    const [high, medium] = newPriorities;
+    onUpdateConfig('priorityDistribution', {
+      High: high,
+      Medium: medium,
+      Low: 100 - high - medium,
+    });
+  }
 
   return (
     <Card>
@@ -56,7 +61,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
               <Slider 
                   id="threadCount"
                   min={10} max={200} step={10} 
-                  defaultValue={[config.threadCount]} 
+                  value={[config.threadCount]} 
                   onValueChange={([v]) => onUpdateConfig('threadCount', v)}
                   disabled={isRunning}
               />
@@ -66,7 +71,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
               <Slider 
                   id="taskCount"
                   min={10} max={500} step={10} 
-                  defaultValue={[config.taskCount]} 
+                  value={[config.taskCount]} 
                   onValueChange={([v]) => onUpdateConfig('taskCount', v)}
                   disabled={isRunning}
               />
@@ -76,17 +81,34 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
               <Slider 
                   id="resourceCount"
                   min={0} max={10} step={1} 
-                  defaultValue={[config.resourceCount]} 
+                  value={[config.resourceCount]} 
                   onValueChange={([v]) => onUpdateConfig('resourceCount', v)}
                   disabled={isRunning}
               />
+          </div>
+          <div className="space-y-3">
+            <Label>Task Priority Distribution</Label>
+            <div className="flex text-xs text-muted-foreground">
+                <span className="text-red-400">H: {config.priorityDistribution.High}%</span>
+                <span className="text-yellow-400 ml-auto">M: {config.priorityDistribution.Medium}%</span>
+                <span className="text-sky-400 ml-auto">L: {config.priorityDistribution.Low}%</span>
+            </div>
+            <Slider
+                id="priorityDistribution"
+                min={0}
+                max={100}
+                step={5}
+                value={[config.priorityDistribution.High, config.priorityDistribution.High + config.priorityDistribution.Medium]}
+                onValueChange={handlePriorityChange}
+                disabled={isRunning}
+            />
           </div>
           <div className="space-y-3">
               <Label htmlFor="simulationSpeed">Simulation Speed ({config.simulationSpeed}ms tick)</Label>
               <Slider 
                   id="simulationSpeed"
                   min={50} max={1000} step={50}
-                  defaultValue={[config.simulationSpeed]} 
+                  value={[config.simulationSpeed]} 
                   onValueChange={([v]) => onUpdateConfig('simulationSpeed', v)}
                   inverted
               />
