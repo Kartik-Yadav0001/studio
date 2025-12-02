@@ -18,7 +18,7 @@ type PriorityDistribution = {
   Low: number;
 }
 
-type SimulationConfig = {
+export type SimulationConfig = {
   threadCount: number;
   taskCount: number;
   resourceCount: number;
@@ -46,6 +46,7 @@ export default function Home() {
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const [log, setLog] = useState<LogEntry[]>([]);
   const logIdCounterRef = useRef(0);
+  const nextThreadId = useRef(0);
 
   const simulationStateRef = useRef({ threads, tasks, resources, completedTasksCount });
   useEffect(() => {
@@ -70,8 +71,9 @@ export default function Home() {
   const resetSimulation = useCallback(() => {
     setStatus('stopped');
     
-    const newThreads = Array.from({ length: config.threadCount }, (_, i) => ({
-      id: i + 1,
+    nextThreadId.current = 0;
+    const newThreads = Array.from({ length: config.threadCount }, () => ({
+      id: nextThreadId.current++,
       status: 'idle' as const,
       currentTaskId: null,
       progress: 0,
@@ -114,17 +116,14 @@ export default function Home() {
     setLog([]);
     logIdCounterRef.current = 0;
     addLog('Simulation reset and initialized.', 'info');
-  }, [config, addLog]);
+  }, [config.threadCount, config.taskCount, config.resourceCount, config.priorityDistribution, addLog]);
 
   useEffect(() => {
     if (isInitialRender.current) {
       isInitialRender.current = false;
       resetSimulation();
-      return;
     }
-    resetSimulation();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.threadCount, config.taskCount, config.resourceCount, config.priorityDistribution]);
+  }, [resetSimulation]);
 
   const runSimulationTick = useCallback(() => {
     let { threads: currentThreads, tasks: currentTasks, resources: currentResources } = simulationStateRef.current;
@@ -134,7 +133,51 @@ export default function Home() {
     let newResources = JSON.parse(JSON.stringify(currentResources)) as Resource[];
     let completedInTick = 0;
 
+    // Handle dynamic thread scaling
+    const activeThreads = newThreads.filter(t => t.status !== 'scaling');
+    if (activeThreads.length < config.threadCount) {
+        // Scale up
+        const threadsToAdd = config.threadCount - activeThreads.length;
+        for (let i = 0; i < threadsToAdd; i++) {
+            newThreads.push({
+                id: nextThreadId.current++,
+                status: 'idle',
+                currentTaskId: null,
+                progress: 0,
+            });
+        }
+        addLog(`Scaled up: Added ${threadsToAdd} new threads.`, 'info');
+    } else if (activeThreads.length > config.threadCount) {
+        // Scale down
+        const threadsToRemoveCount = activeThreads.length - config.threadCount;
+        let removedCount = 0;
+        // Prioritize removing idle threads first
+        for (let i = newThreads.length - 1; i >= 0 && removedCount < threadsToRemoveCount; i--) {
+            const thread = newThreads[i];
+            if (thread.status === 'idle') {
+                thread.status = 'scaling'; 
+                removedCount++;
+            }
+        }
+        // If not enough idle threads, mark busy ones for removal upon completion
+        for (let i = newThreads.length - 1; i >= 0 && removedCount < threadsToRemoveCount; i--) {
+            const thread = newThreads[i];
+            if (thread.status !== 'scaling') {
+                 thread.status = 'scaling';
+                 removedCount++;
+            }
+        }
+        addLog(`Scaling down: Marked ${threadsToRemoveCount} threads for removal.`, 'warning');
+    }
+    
+    // Remove threads marked for scaling that are now idle
+    newThreads = newThreads.filter(thread => !(thread.status === 'scaling' && thread.currentTaskId === null));
+
+
     newThreads.forEach((thread) => {
+      // Don't process threads marked for scaling down further
+      if (thread.status === 'scaling') return;
+
       if (thread.status === 'running' && thread.currentTaskId !== null) {
         const task = newTasks.find((t) => t.id === thread.currentTaskId);
         if (task) {
@@ -152,6 +195,10 @@ export default function Home() {
                 resource.lockedByThreadId = null;
                 addLog(`Resource ${resource.id} released by Thread ${thread.id}.`, 'info');
               }
+            }
+             // If thread was marked for scaling, it will now be idle and removed on the next tick
+            if (activeThreads.length > config.threadCount) {
+                thread.status = 'scaling';
             }
           }
         }
@@ -212,7 +259,7 @@ export default function Home() {
     }
 
     const runningThreads = newThreads.filter((t) => t.status === 'running').length;
-    const totalThreads = newThreads.length;
+    const totalThreads = newThreads.filter(t => t.status !== 'scaling').length;
     const cpuUsage = totalThreads > 0 ? (runningThreads / totalThreads) * 100 + Math.random() * 5 : 0;
     const activeTasks = newTasks.filter((t) => t.remaining > 0).length;
     const memoryUsage = (totalThreads * 0.1 + activeTasks * 0.02) * (1 + Math.random() * 0.1);
@@ -227,7 +274,7 @@ export default function Home() {
       return [...prev, newPoint].slice(-MAX_HISTORY);
     });
 
-  }, [addLog]);
+  }, [addLog, config.threadCount]);
 
   useEffect(() => {
     if (status === 'running') {
@@ -245,11 +292,23 @@ export default function Home() {
   }, [status, config.simulationSpeed, runSimulationTick]);
 
   const handleUpdateConfig = <K extends keyof SimulationConfig>(key: K, value: SimulationConfig[K]) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
-    if (key !== 'simulationSpeed') {
+     if (status !== 'stopped' && key !== 'simulationSpeed' && key !== 'threadCount') {
         setStatus('stopped');
+        setConfig(prev => ({ ...prev, [key]: value }));
+        // This will trigger the reset automatically via the other useEffect
+    } else {
+        setConfig(prev => ({ ...prev, [key]: value }));
     }
   };
+  
+  // Effect to reset simulation only when specific config values change AND simulation is stopped
+  useEffect(() => {
+    if (status === 'stopped') {
+        resetSimulation();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.taskCount, config.resourceCount, config.priorityDistribution, status === 'stopped']);
+
   
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -261,7 +320,7 @@ export default function Home() {
               status={status}
               onStart={() => setStatus('running')}
               onPause={() => setStatus('paused')}
-              onStop={resetSimulation}
+              onStop={() => setStatus('stopped')}
               onUpdateConfig={handleUpdateConfig}
               config={config}
             />
