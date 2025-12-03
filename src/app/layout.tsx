@@ -6,8 +6,8 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata: Metadata = {
-  title: 'Scalable Thread Management Library',
-  description: 'Design a thread management library that supports efficient creation, synchronization, and termination of threads. The library should be scalable to handle thousands of threads concurrently, suitable for high-performance computing applications.',
+  title: 'Thread Weaver - A High-Performance Threading Simulator',
+  description: 'An interactive dashboard to simulate and visualize the behavior of a multi-threaded application, demonstrating concepts like workload distribution, mutex locks, and thread synchronization.',
 };
 
 export default function RootLayout({
