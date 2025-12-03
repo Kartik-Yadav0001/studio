@@ -9,6 +9,7 @@ import { ResourceMonitor } from '@/components/dashboard/resource-monitor';
 import { ThreadGrid } from '@/components/dashboard/thread-grid';
 import { TaskLog } from '@/components/dashboard/task-log';
 import type { PerformanceDataPoint, Resource, Task, Thread, LogEntry, TaskPriority } from '@/lib/types';
+import { SystemStats } from '@/components/dashboard/system-stats';
 
 export type SimulationStatus = 'running' | 'paused' | 'stopped';
 
@@ -46,6 +47,7 @@ export default function Home() {
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const [log, setLog] = useState<LogEntry[]>([]);
   const logIdCounterRef = useRef(0);
+  const simulationTimeRef = useRef(0);
 
   const simulationStateRef = useRef({ threads, tasks, resources, completedTasksCount });
   useEffect(() => {
@@ -116,6 +118,7 @@ export default function Home() {
     setCompletedTasksCount(0);
     setLog([]);
     logIdCounterRef.current = 0;
+    simulationTimeRef.current = 0;
     addLog('Simulation reset and initialized.', 'info');
   }, [config, addLog]);
 
@@ -167,6 +170,7 @@ export default function Home() {
   }, [addLog]);
 
   const runSimulationTick = useCallback(() => {
+    simulationTimeRef.current += config.simulationSpeed;
     let { threads: currentThreads, tasks: currentTasks, resources: currentResources } = simulationStateRef.current;
     
     let newThreads = JSON.parse(JSON.stringify(currentThreads)) as Thread[];
@@ -289,7 +293,8 @@ export default function Home() {
 
     const runningThreads = newThreads.filter((t) => t.status === 'running').length;
     const totalThreads = newThreads.length;
-    const cpuUsage = totalThreads > 0 ? (runningThreads / totalThreads) * 100 + Math.random() * 5 : 0;
+    const threadUtilization = totalThreads > 0 ? (runningThreads / totalThreads) * 100 : 0;
+    const cpuUsage = threadUtilization + Math.random() * 5;
     const activeTasks = newTasks.filter((t) => t.remaining > 0).length;
     const memoryUsage = (totalThreads * 0.1 + activeTasks * 0.02) * (1 + Math.random() * 0.1);
 
@@ -298,12 +303,13 @@ export default function Home() {
         name: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
         cpuUsage: Math.min(100, parseFloat(cpuUsage.toFixed(1))),
         memoryUsage: Math.min(100, parseFloat(memoryUsage.toFixed(1))),
+        threadUtilization: Math.min(100, parseFloat(threadUtilization.toFixed(1))),
         completedTasks: (prev.at(-1)?.completedTasks ?? 0) + completedInTick
       };
       return [...prev, newPoint].slice(-MAX_HISTORY);
     });
 
-  }, [addLog]);
+  }, [addLog, config.simulationSpeed]);
 
   useEffect(() => {
     if (status === 'running') {
@@ -331,6 +337,10 @@ export default function Home() {
     }
   };
   
+  const tasksRemaining = tasks.filter(t => t.remaining > 0 && !threads.some(th => th.currentTaskId === t.id)).length;
+  const simulationSeconds = simulationTimeRef.current / 1000;
+  const throughput = simulationSeconds > 0 ? completedTasksCount / simulationSeconds : 0;
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
@@ -347,12 +357,17 @@ export default function Home() {
             />
             <ResourceMonitor resources={resources}/>
           </div>
-          <div className='lg:col-span-2 xl:col-span-2 flex flex-col gap-6'>
+          <div className='lg:col-span-2 xl:col-span-3 flex flex-col gap-6'>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <SystemStats 
+                tasksRemaining={tasksRemaining}
+                completedTasks={completedTasksCount}
+                throughput={throughput}
+                threadUtilization={performanceHistory.at(-1)?.threadUtilization ?? 0}
+              />
+            </div>
             <PerformanceChart data={performanceHistory} />
             <ThreadGrid threads={threads} tasks={tasks} />
-          </div>
-          <div className="lg:col-span-3 xl:col-span-1">
-             <TaskLog log={log}/>
           </div>
           <div className="lg:col-span-3 xl:col-span-4">
              <AiOptimizer 

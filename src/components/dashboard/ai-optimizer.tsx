@@ -54,13 +54,17 @@ export function AiOptimizer({
     if (performanceHistory.length === 0) return "No performance data yet. Run the simulation to gather data.";
     const cpuPoints = performanceHistory.map(p => p.cpuUsage);
     const memPoints = performanceHistory.map(p => p.memoryUsage);
+    const utilPoints = performanceHistory.map(p => p.threadUtilization);
     const avgCpu = cpuPoints.reduce((a, b) => a + b, 0) / cpuPoints.length;
     const maxCpu = Math.max(...cpuPoints);
     const avgMem = memPoints.reduce((a, b) => a + b, 0) / memPoints.length;
     const maxMem = Math.max(...memPoints);
+    const avgUtil = utilPoints.reduce((a, b) => a + b, 0) / utilPoints.length;
+    
     return `Historical performance over last ${performanceHistory.length} ticks:
 - CPU Usage: Average ${avgCpu.toFixed(1)}%, Peak ${maxCpu.toFixed(1)}%.
 - Memory Usage: Average ${avgMem.toFixed(1)}%, Peak ${maxMem.toFixed(1)}%.
+- Thread Utilization: Average ${avgUtil.toFixed(1)}%.
 - Tasks Completed: ${performanceHistory.at(-1)?.completedTasks ?? 0}.`;
   }, [performanceHistory]);
 
@@ -68,11 +72,12 @@ export function AiOptimizer({
     const runningThreads = threads.filter(t => t.status === 'running').length;
     const waitingThreads = threads.filter(t => t.status === 'waiting').length;
     const idleThreads = threads.filter(t => t.status === 'idle').length;
+    const totalThreads = threads.length;
     return `Current snapshot:
-- Total Threads: ${threads.length}.
-- Running: ${runningThreads} (${((runningThreads / threads.length) * 100 || 0).toFixed(1)}%).
-- Waiting for resources: ${waitingThreads} (${((waitingThreads / threads.length) * 100 || 0).toFixed(1)}%).
-- Idle: ${idleThreads} (${((idleThreads / threads.length) * 100 || 0).toFixed(1)}%).
+- Total Threads: ${totalThreads}.
+- Running: ${runningThreads} (${((runningThreads / totalThreads) * 100 || 0).toFixed(1)}%).
+- Waiting for resources: ${waitingThreads} (${((waitingThreads / totalThreads) * 100 || 0).toFixed(1)}%).
+- Idle: ${idleThreads} (${((idleThreads / totalThreads) * 100 || 0).toFixed(1)}%).
 - Latest CPU: ${performanceHistory.at(-1)?.cpuUsage ?? 'N/A'}%
 - Latest Memory: ${performanceHistory.at(-1)?.memoryUsage ?? 'N/A'}%`;
   }, [threads, performanceHistory]);

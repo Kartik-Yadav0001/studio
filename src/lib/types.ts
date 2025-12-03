@@ -26,6 +26,7 @@ export interface PerformanceDataPoint {
   name: string;
   cpuUsage: number;
   memoryUsage: number;
+  threadUtilization: number;
   completedTasks: number;
 }
 

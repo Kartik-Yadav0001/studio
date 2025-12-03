@@ -9,9 +9,9 @@ import {
   ChartLegendContent,
 } from '@/components/ui/chart';
 import type { PerformanceDataPoint } from '@/lib/types';
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Line, ComposedChart } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Activity } from 'lucide-react';
+import { Activity, Zap } from 'lucide-react';
 
 const chartConfig = {
   cpuUsage: {
@@ -21,6 +21,10 @@ const chartConfig = {
   memoryUsage: {
     label: 'Memory',
     color: 'hsl(var(--chart-2))',
+  },
+  threadUtilization: {
+    label: 'Utilization',
+    color: 'hsl(var(--chart-3))',
   },
 } satisfies ChartConfig;
 
@@ -37,12 +41,12 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
                 System Performance
             </CardTitle>
             <CardDescription>
-                Real-time simulated CPU and memory usage based on thread activity.
+                Real-time simulated CPU, memory, and thread utilization.
             </CardDescription>
         </CardHeader>
         <CardContent>
             <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
-                <AreaChart
+                <ComposedChart
                     accessibilityLayer
                     data={data}
                     margin={{
@@ -93,8 +97,16 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
                         stackId="b"
                         name="Memory Usage"
                     />
+                     <Line
+                        dataKey="threadUtilization"
+                        type="natural"
+                        stroke="var(--color-threadUtilization)"
+                        strokeWidth={2}
+                        dot={false}
+                        name="Thread Utilization"
+                    />
                     <ChartLegend content={<ChartLegendContent />} />
-                </AreaChart>
+                </ComposedChart>
             </ChartContainer>
         </CardContent>
     </Card>
