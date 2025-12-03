@@ -25,7 +25,7 @@ const priorityColors: Record<TaskPriority, string> = {
 function ThreadVisual({ thread, task }: { thread: Thread; task: Task | undefined }) {
   const status = statusConfig[thread.status];
   const Icon = status.icon;
-  const borderColor = task ? priorityColors[task.priority] : 'border-transparent';
+  const borderColor = task && thread.status !== 'idle' ? priorityColors[task.priority] : 'border-transparent';
 
   return (
     <Tooltip>
@@ -41,8 +41,8 @@ function ThreadVisual({ thread, task }: { thread: Thread; task: Task | undefined
       <TooltipContent>
         <p>Thread ID: {thread.id}</p>
         <p>Status: <span className="font-semibold">{status.label}</span></p>
-        {task && <p>Task ID: {task.id}</p>}
-        {task && <p>Task Priority: {task.priority}</p>}
+        {task && thread.currentTaskId && <p>Task ID: {task.id}</p>}
+        {task && thread.currentTaskId && <p>Task Priority: {task.priority}</p>}
         {thread.status === 'running' && <p>Progress: {thread.progress.toFixed(0)}%</p>}
       </TooltipContent>
     </Tooltip>
@@ -72,7 +72,7 @@ export function ThreadGrid({ threads, tasks }: ThreadGridProps) {
                 <Cpu/>
                 Thread Pool Activity
             </CardTitle>
-            <CardDescription className='flex flex-wrap gap-x-4 gap-y-1'>
+            <CardDescription className='flex flex-wrap gap-x-4 gap-y-1 items-center'>
                 <span>Total: <span className="font-semibold text-foreground">{threads.length}</span></span>
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-primary" />

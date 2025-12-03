@@ -2,12 +2,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import type { LogEntry } from '@/lib/types';
-import { ListChecks, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ListChecks, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 
 const logTypeConfig: Record<LogEntry['type'], { icon: React.ElementType; color: string; }> = {
-  info: { icon: ListChecks, color: 'text-sky-400' },
+  info: { icon: Info, color: 'text-sky-400' },
   warning: { icon: AlertTriangle, color: 'text-yellow-400' },
   success: { icon: CheckCircle, color: 'text-green-400' },
 };

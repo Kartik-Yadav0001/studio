@@ -142,7 +142,7 @@ export default function Home() {
         return [...prevThreads, ...newThreadsToAdd];
       } else if (newThreadCount < currentCount) {
         let threadsToTerminateCount = currentCount - newThreadCount;
-        const newThreads = [...prevThreads];
+        const newThreads = JSON.parse(JSON.stringify(prevThreads)) as Thread[];
 
         // Mark idle threads for termination first
         for (let i = newThreads.length - 1; i >= 0 && threadsToTerminateCount > 0; i--) {
@@ -175,23 +175,26 @@ export default function Home() {
     let completedInTick = 0;
     
     let threadsToRemove: number[] = [];
+    const tasksToRequeue: Task[] = [];
 
     newThreads.forEach((thread) => {
+      // Handle running threads
       if (thread.status === 'running' && thread.currentTaskId !== null) {
         const task = newTasks.find((t) => t.id === thread.currentTaskId);
         if (task) {
           task.remaining--;
           thread.progress = 100 * (1 - task.remaining / task.duration);
+
           if (task.remaining <= 0) {
             addLog(`Task ${task.id} (P: ${task.priority}) completed by Thread ${thread.id}.`, 'success');
             completedInTick++;
-            
+            thread.currentTaskId = null; // Mark task as done for this thread
+
             if (thread.status === 'terminating') {
               threadsToRemove.push(thread.id);
               addLog(`Terminating Thread ${thread.id} after task completion.`, 'info');
             } else {
               thread.status = 'idle';
-              thread.currentTaskId = null;
               thread.progress = 0;
             }
             
@@ -204,9 +207,20 @@ export default function Home() {
             }
           }
         }
-      } else if (thread.status === 'idle' && thread.status === 'terminating') {
+      } 
+      // Handle threads marked for termination
+      else if (thread.status === 'terminating' && thread.status !== 'running') {
           threadsToRemove.push(thread.id);
-          addLog(`Terminated idle Thread ${thread.id}.`, 'info');
+          addLog(`Terminated idle/waiting Thread ${thread.id}.`, 'info');
+          
+          // Re-queue task if thread is terminated while waiting
+          if (thread.currentTaskId) {
+            const taskToRequeue = newTasks.find(t => t.id === thread.currentTaskId);
+            if (taskToRequeue) {
+              tasksToRequeue.push(taskToRequeue);
+              addLog(`Task ${taskToRequeue.id} requeued from terminated Thread ${thread.id}.`, 'warning');
+            }
+          }
       }
     });
 
@@ -226,7 +240,13 @@ export default function Home() {
       }
     });
 
-    const unassignedTasks = newTasks.filter((t) => t.remaining > 0 && !newThreads.some((th) => th.currentTaskId === t.id));
+    let unassignedTasks = newTasks.filter((t) => t.remaining > 0 && !newThreads.some((th) => th.currentTaskId === t.id));
+    
+    // Add requeued tasks back to the pool of unassigned tasks
+    if(tasksToRequeue.length > 0) {
+      unassignedTasks = [...unassignedTasks, ...tasksToRequeue];
+    }
+    
     unassignedTasks.sort((a, b) => {
         const priorityOrder: Record<TaskPriority, number> = { High: 1, Medium: 2, Low: 3 };
         return priorityOrder[a.priority] - priorityOrder[b.priority];
