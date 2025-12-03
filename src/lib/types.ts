@@ -1,4 +1,4 @@
-export type ThreadStatus = 'idle' | 'running' | 'waiting';
+export type ThreadStatus = 'idle' | 'running' | 'waiting' | 'terminating';
 export type TaskPriority = 'High' | 'Medium' | 'Low';
 
 export interface Thread {

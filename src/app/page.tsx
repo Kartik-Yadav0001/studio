@@ -18,7 +18,7 @@ type PriorityDistribution = {
   Low: number;
 }
 
-type SimulationConfig = {
+export type SimulationConfig = {
   threadCount: number;
   taskCount: number;
   resourceCount: number;
@@ -54,6 +54,7 @@ export default function Home() {
   
   const isInitialRender = useRef(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const threadIdCounterRef = useRef(config.threadCount);
   
   const addLog = useCallback((message: string, type: LogEntry['type']) => {
     setLog(prevLog => {
@@ -76,6 +77,7 @@ export default function Home() {
       currentTaskId: null,
       progress: 0,
     }));
+    threadIdCounterRef.current = config.threadCount;
 
     const newResources = Array.from({ length: config.resourceCount }, (_, i) => ({
       id: `Resource ${String.fromCharCode(65 + i)}`,
@@ -114,17 +116,55 @@ export default function Home() {
     setLog([]);
     logIdCounterRef.current = 0;
     addLog('Simulation reset and initialized.', 'info');
-  }, [config, addLog]);
+  }, [config.threadCount, config.taskCount, config.resourceCount, config.priorityDistribution, addLog]);
 
   useEffect(() => {
     if (isInitialRender.current) {
       isInitialRender.current = false;
       resetSimulation();
-      return;
     }
-    resetSimulation();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.threadCount, config.taskCount, config.resourceCount, config.priorityDistribution]);
+  }, []);
+
+  const scaleThreads = useCallback((newThreadCount: number) => {
+    setThreads(prevThreads => {
+      const currentCount = prevThreads.length;
+      if (newThreadCount > currentCount) {
+        // Add new threads
+        const newThreads = Array.from({ length: newThreadCount - currentCount }, () => ({
+          id: ++threadIdCounterRef.current,
+          status: 'idle' as const,
+          currentTaskId: null,
+          progress: 0,
+        }));
+        addLog(`Scaled up to ${newThreadCount} threads.`, 'info');
+        return [...prevThreads, ...newThreads];
+      } else if (newThreadCount < currentCount) {
+        // Mark threads for termination
+        let threadsToTerminate = currentCount - newThreadCount;
+        const newThreads = [...prevThreads];
+        
+        // Prioritize terminating idle threads
+        for (let i = newThreads.length - 1; i >= 0 && threadsToTerminate > 0; i--) {
+          if (newThreads[i].status === 'idle') {
+            newThreads.splice(i, 1);
+            threadsToTerminate--;
+          }
+        }
+        
+        // If more threads need to be terminated, mark busy ones
+        for (let i = newThreads.length - 1; i >= 0 && threadsToTerminate > 0; i--) {
+          if (newThreads[i].status !== 'terminating') {
+            newThreads[i].status = 'terminating';
+            threadsToTerminate--;
+          }
+        }
+        addLog(`Scaling down to ${newThreadCount} threads.`, 'warning');
+        return newThreads;
+      }
+      return prevThreads;
+    });
+  }, [addLog]);
 
   const runSimulationTick = useCallback(() => {
     let { threads: currentThreads, tasks: currentTasks, resources: currentResources } = simulationStateRef.current;
@@ -133,6 +173,8 @@ export default function Home() {
     let newTasks = JSON.parse(JSON.stringify(currentTasks)) as Task[];
     let newResources = JSON.parse(JSON.stringify(currentResources)) as Resource[];
     let completedInTick = 0;
+    
+    let threadsToRemove: number[] = [];
 
     newThreads.forEach((thread) => {
       if (thread.status === 'running' && thread.currentTaskId !== null) {
@@ -142,10 +184,17 @@ export default function Home() {
           thread.progress = 100 * (1 - task.remaining / task.duration);
           if (task.remaining <= 0) {
             addLog(`Task ${task.id} (P: ${task.priority}) completed by Thread ${thread.id}.`, 'success');
-            thread.status = 'idle';
-            thread.currentTaskId = null;
-            thread.progress = 0;
             completedInTick++;
+            
+            if (thread.status === 'terminating') {
+              threadsToRemove.push(thread.id);
+              addLog(`Terminating Thread ${thread.id} after task completion.`, 'info');
+            } else {
+              thread.status = 'idle';
+              thread.currentTaskId = null;
+              thread.progress = 0;
+            }
+            
             if (task.resourceId) {
               const resource = newResources.find((r) => r.id === task.resourceId);
               if (resource && resource.lockedByThreadId === thread.id) {
@@ -155,8 +204,15 @@ export default function Home() {
             }
           }
         }
+      } else if (thread.status === 'idle' && thread.status === 'terminating') {
+          threadsToRemove.push(thread.id);
       }
     });
+
+    if(threadsToRemove.length > 0) {
+        newThreads = newThreads.filter(t => !threadsToRemove.includes(t.id));
+    }
+
 
     newResources.forEach((resource) => {
       if (resource.lockedByThreadId === null && resource.queue.length > 0) {
@@ -246,10 +302,20 @@ export default function Home() {
 
   const handleUpdateConfig = <K extends keyof SimulationConfig>(key: K, value: SimulationConfig[K]) => {
     setConfig(prev => ({ ...prev, [key]: value }));
-    if (key !== 'simulationSpeed') {
-        setStatus('stopped');
+    if (key === 'threadCount') {
+        scaleThreads(value as number);
+    } else if (key !== 'simulationSpeed') {
+        resetSimulation();
     }
   };
+  
+  // Effect to trigger reset when certain configs change
+  useEffect(() => {
+    if (!isInitialRender.current) {
+        resetSimulation();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.taskCount, config.resourceCount, config.priorityDistribution]);
   
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -278,7 +344,10 @@ export default function Home() {
              <AiOptimizer 
               performanceHistory={performanceHistory} 
               threads={threads}
-              onApplyRecommendation={(threadCount: number) => handleUpdateConfig('threadCount', threadCount)}
+              onApplyRecommendation={(threadCount: number) => {
+                setConfig(prev => ({ ...prev, threadCount }));
+                scaleThreads(threadCount);
+              }}
              />
           </div>
         </div>

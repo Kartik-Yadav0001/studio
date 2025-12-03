@@ -63,7 +63,6 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
                   min={10} max={200} step={10} 
                   value={[config.threadCount]} 
                   onValueChange={([v]) => onUpdateConfig('threadCount', v)}
-                  disabled={isRunning}
               />
           </div>
           <div className="space-y-3">
@@ -73,7 +72,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
                   min={10} max={500} step={10} 
                   value={[config.taskCount]} 
                   onValueChange={([v]) => onUpdateConfig('taskCount', v)}
-                  disabled={isRunning}
+                  disabled={isRunning || status === 'paused'}
               />
           </div>
           <div className="space-y-3">
@@ -83,7 +82,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
                   min={0} max={10} step={1} 
                   value={[config.resourceCount]} 
                   onValueChange={([v]) => onUpdateConfig('resourceCount', v)}
-                  disabled={isRunning}
+                  disabled={isRunning || status === 'paused'}
               />
           </div>
           <div className="space-y-3">
@@ -100,7 +99,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
                 step={5}
                 value={[config.priorityDistribution.High, config.priorityDistribution.High + config.priorityDistribution.Medium]}
                 onValueChange={handlePriorityChange}
-                disabled={isRunning}
+                disabled={isRunning || status === 'paused'}
             />
           </div>
           <div className="space-y-3">

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Thread, ThreadStatus, Task, TaskPriority } from '@/lib/types';
-import { Circle, Cpu, Loader, PauseCircle } from 'lucide-react';
+import { Circle, Cpu, Loader, PauseCircle, XCircle } from 'lucide-react';
 import { Progress } from '../ui/progress';
 
 const statusConfig: Record<
@@ -13,6 +13,7 @@ const statusConfig: Record<
   idle: { label: 'Idle', icon: Circle, color: 'text-muted-foreground/60' },
   running: { label: 'Running', icon: Loader, color: 'text-primary animate-spin' },
   waiting: { label: 'Waiting', icon: PauseCircle, color: 'text-yellow-400' },
+  terminating: { label: 'Terminating', icon: XCircle, color: 'text-destructive' },
 };
 
 const priorityColors: Record<TaskPriority, string> = {
@@ -56,10 +57,10 @@ interface ThreadGridProps {
 export function ThreadGrid({ threads, tasks }: ThreadGridProps) {
   const summary = threads.reduce(
     (acc, thread) => {
-      acc[thread.status]++;
+      acc[thread.status] = (acc[thread.status] || 0) + 1;
       return acc;
     },
-    { idle: 0, running: 0, waiting: 0 } as Record<ThreadStatus, number>
+    { idle: 0, running: 0, waiting: 0, terminating: 0 } as Record<ThreadStatus, number>
   );
 
   const taskMap = new Map(tasks.map(task => [task.id, task]));
@@ -85,6 +86,10 @@ export function ThreadGrid({ threads, tasks }: ThreadGridProps) {
                   <span className="h-2 w-2 rounded-full bg-muted-foreground/60" />
                   Idle: <span className="text-muted-foreground font-semibold">{summary.idle}</span>
                 </span>
+                 {summary.terminating > 0 && <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-destructive" />
+                  Terminating: <span className="text-destructive font-semibold">{summary.terminating}</span>
+                </span>}
             </CardDescription>
         </CardHeader>
         <CardContent>
