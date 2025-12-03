@@ -20,6 +20,8 @@ interface ControlsProps {
 
 export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, config }: ControlsProps) {
   const isRunning = status === 'running';
+  const isPaused = status === 'paused';
+  const isStopped = status === 'stopped';
 
   const handlePriorityChange = (newPriorities: number[]) => {
     const [high, medium] = newPriorities;
@@ -46,11 +48,11 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
               <Pause className="mr-2" /> Pause
             </Button>
           ) : (
-            <Button onClick={onStart} className="flex-1" aria-label="Start or resume simulation">
-              <Play className="mr-2" /> {status === 'paused' ? 'Resume' : 'Start'}
+            <Button onClick={onStart} className="flex-1" aria-label="Start or resume simulation" disabled={!isStopped && !isPaused}>
+              <Play className="mr-2" /> {isPaused ? 'Resume' : 'Start'}
             </Button>
           )}
-          <Button onClick={onStop} variant="outline" className="flex-1" aria-label="Reset simulation">
+          <Button onClick={onStop} variant="outline" className="flex-1" aria-label="Reset simulation" disabled={isStopped}>
             <Square className="mr-2" /> Reset
           </Button>
         </div>
@@ -72,7 +74,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
                   min={10} max={500} step={10} 
                   value={[config.taskCount]} 
                   onValueChange={([v]) => onUpdateConfig('taskCount', v)}
-                  disabled={isRunning || status === 'paused'}
+                  disabled={isRunning || isPaused}
               />
           </div>
           <div className="space-y-3">
@@ -82,7 +84,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
                   min={0} max={10} step={1} 
                   value={[config.resourceCount]} 
                   onValueChange={([v]) => onUpdateConfig('resourceCount', v)}
-                  disabled={isRunning || status === 'paused'}
+                  disabled={isRunning || isPaused}
               />
           </div>
           <div className="space-y-3">
@@ -99,7 +101,7 @@ export function Controls({ status, onStart, onPause, onStop, onUpdateConfig, con
                 step={5}
                 value={[config.priorityDistribution.High, config.priorityDistribution.High + config.priorityDistribution.Medium]}
                 onValueChange={handlePriorityChange}
-                disabled={isRunning || status === 'paused'}
+                disabled={isRunning || isPaused}
             />
           </div>
           <div className="space-y-3">

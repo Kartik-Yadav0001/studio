@@ -68,18 +68,19 @@ export default function Home() {
     });
   }, []);
 
-  const resetSimulation = useCallback(() => {
+  const resetSimulation = useCallback((newConfig?: SimulationConfig) => {
+    const currentConfig = newConfig || config;
     setStatus('stopped');
     
-    const newThreads = Array.from({ length: config.threadCount }, (_, i) => ({
+    const newThreads = Array.from({ length: currentConfig.threadCount }, (_, i) => ({
       id: i + 1,
       status: 'idle' as const,
       currentTaskId: null,
       progress: 0,
     }));
-    threadIdCounterRef.current = config.threadCount;
+    threadIdCounterRef.current = currentConfig.threadCount;
 
-    const newResources = Array.from({ length: config.resourceCount }, (_, i) => ({
+    const newResources = Array.from({ length: currentConfig.resourceCount }, (_, i) => ({
       id: `Resource ${String.fromCharCode(65 + i)}`,
       lockedByThreadId: null,
       queue: [],
@@ -87,17 +88,17 @@ export default function Home() {
 
     const getPriority = (): TaskPriority => {
         const rand = Math.random() * 100;
-        const { High, Medium } = config.priorityDistribution;
+        const { High, Medium } = currentConfig.priorityDistribution;
         if (rand < High) return 'High';
         if (rand < High + Medium) return 'Medium';
         return 'Low';
     }
 
-    const newTasks = Array.from({ length: config.taskCount }, (_, i) => {
+    const newTasks = Array.from({ length: currentConfig.taskCount }, (_, i) => {
         const duration = Math.floor(Math.random() * 40) + 10;
-        const needsResource = config.resourceCount > 0 && Math.random() < 0.3;
+        const needsResource = currentConfig.resourceCount > 0 && Math.random() < 0.3;
         const resourceId = needsResource
-            ? `Resource ${String.fromCharCode(65 + Math.floor(Math.random() * config.resourceCount))}`
+            ? `Resource ${String.fromCharCode(65 + Math.floor(Math.random() * currentConfig.resourceCount))}`
             : null;
         return {
             id: i + 1,
@@ -116,7 +117,7 @@ export default function Home() {
     setLog([]);
     logIdCounterRef.current = 0;
     addLog('Simulation reset and initialized.', 'info');
-  }, [config.threadCount, config.taskCount, config.resourceCount, config.priorityDistribution, addLog]);
+  }, [config, addLog]);
 
   useEffect(() => {
     if (isInitialRender.current) {
@@ -131,32 +132,31 @@ export default function Home() {
       const currentCount = prevThreads.length;
       if (newThreadCount > currentCount) {
         // Add new threads
-        const newThreads = Array.from({ length: newThreadCount - currentCount }, () => ({
+        const newThreadsToAdd = Array.from({ length: newThreadCount - currentCount }, () => ({
           id: ++threadIdCounterRef.current,
           status: 'idle' as const,
           currentTaskId: null,
           progress: 0,
         }));
         addLog(`Scaled up to ${newThreadCount} threads.`, 'info');
-        return [...prevThreads, ...newThreads];
+        return [...prevThreads, ...newThreadsToAdd];
       } else if (newThreadCount < currentCount) {
-        // Mark threads for termination
-        let threadsToTerminate = currentCount - newThreadCount;
+        let threadsToTerminateCount = currentCount - newThreadCount;
         const newThreads = [...prevThreads];
-        
-        // Prioritize terminating idle threads
-        for (let i = newThreads.length - 1; i >= 0 && threadsToTerminate > 0; i--) {
+
+        // Mark idle threads for termination first
+        for (let i = newThreads.length - 1; i >= 0 && threadsToTerminateCount > 0; i--) {
           if (newThreads[i].status === 'idle') {
-            newThreads.splice(i, 1);
-            threadsToTerminate--;
+            newThreads[i].status = 'terminating';
+            threadsToTerminateCount--;
           }
         }
         
         // If more threads need to be terminated, mark busy ones
-        for (let i = newThreads.length - 1; i >= 0 && threadsToTerminate > 0; i--) {
+        for (let i = newThreads.length - 1; i >= 0 && threadsToTerminateCount > 0; i--) {
           if (newThreads[i].status !== 'terminating') {
             newThreads[i].status = 'terminating';
-            threadsToTerminate--;
+            threadsToTerminateCount--;
           }
         }
         addLog(`Scaling down to ${newThreadCount} threads.`, 'warning');
@@ -206,13 +206,13 @@ export default function Home() {
         }
       } else if (thread.status === 'idle' && thread.status === 'terminating') {
           threadsToRemove.push(thread.id);
+          addLog(`Terminated idle Thread ${thread.id}.`, 'info');
       }
     });
 
     if(threadsToRemove.length > 0) {
         newThreads = newThreads.filter(t => !threadsToRemove.includes(t.id));
     }
-
 
     newResources.forEach((resource) => {
       if (resource.lockedByThreadId === null && resource.queue.length > 0) {
@@ -301,21 +301,15 @@ export default function Home() {
   }, [status, config.simulationSpeed, runSimulationTick]);
 
   const handleUpdateConfig = <K extends keyof SimulationConfig>(key: K, value: SimulationConfig[K]) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
+    const newConfig = { ...config, [key]: value };
+    setConfig(newConfig);
+
     if (key === 'threadCount') {
         scaleThreads(value as number);
-    } else if (key !== 'simulationSpeed') {
-        resetSimulation();
+    } else if (key !== 'simulationSpeed' && status !== 'running' && status !== 'paused') {
+        resetSimulation(newConfig);
     }
   };
-  
-  // Effect to trigger reset when certain configs change
-  useEffect(() => {
-    if (!isInitialRender.current) {
-        resetSimulation();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.taskCount, config.resourceCount, config.priorityDistribution]);
   
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -327,7 +321,7 @@ export default function Home() {
               status={status}
               onStart={() => setStatus('running')}
               onPause={() => setStatus('paused')}
-              onStop={resetSimulation}
+              onStop={() => { setStatus('stopped'); resetSimulation(); }}
               onUpdateConfig={handleUpdateConfig}
               config={config}
             />
