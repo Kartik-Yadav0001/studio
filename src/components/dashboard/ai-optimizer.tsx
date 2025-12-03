@@ -93,7 +93,7 @@ export function AiOptimizer({
         onApplyRecommendation(state.data.recommendedThreadCount);
         toast({
             title: 'Recommendation Applied',
-            description: `Thread count set to ${state.data.recommendedThreadCount}. The simulation has been reset.`,
+            description: `Thread count set to ${state.data.recommendedThreadCount}.`,
         });
     }
   };
@@ -103,10 +103,10 @@ export function AiOptimizer({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BrainCircuit />
-          Intelligent Thread Count Optimizer
+          AI Performance Analyst
         </CardTitle>
         <CardDescription>
-          Leverage generative AI to recommend an optimal thread count based on real-time simulation data and workload characteristics.
+          Leverage generative AI to analyze performance and recommend an optimal thread count based on the workload profile.
         </CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>

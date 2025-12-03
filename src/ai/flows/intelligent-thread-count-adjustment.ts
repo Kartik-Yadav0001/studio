@@ -54,12 +54,18 @@ const prompt = ai.definePrompt({
   output: {schema: IntelligentThreadCountAdjustmentOutputSchema},
   prompt: `You are an AI expert in optimizing thread counts for high-performance computing applications.
 
-You will receive historical system load data, current usage metrics, and a description of the application needs.
-Based on this information, you will recommend an optimal number of threads to use to maximize efficiency.
-Explain your reasoning for the thread count you suggest.
+You will receive historical system load data, current usage metrics, and a description of the application's workload profile.
+Based on this information, you will recommend an optimal number of threads.
+
+Analyze the data for signs of under-utilization (low CPU, many idle threads) or over-subscription (high CPU, high memory, many threads waiting for resources).
+If many threads are waiting, it could indicate an I/O-bound workload or resource contention, suggesting that fewer threads might be more efficient.
+If CPU usage is consistently low with many idle threads, the system can handle more threads to increase throughput.
+If CPU usage is near 100% but many threads are running, the system might be CPU-bound, and adding more threads could lead to excessive context switching. A slight reduction might improve performance.
+
+Provide a clear, concise reasoning for your recommendation based on this analysis.
 
 Historical Load Data: {{{historicalLoadData}}}
-Current Usage Metrics: {{{currentUsageMetrics}}}
+Current UsageMetrics: {{{currentUsageMetrics}}}
 Application Needs: {{{applicationNeeds}}}`,
 });
 
