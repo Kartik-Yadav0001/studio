@@ -356,6 +356,9 @@ export default function Home() {
               config={config}
             />
             <ResourceMonitor resources={resources}/>
+             <div className="hidden xl:flex">
+              <TaskLog log={log} />
+            </div>
           </div>
           <div className='lg:col-span-2 xl:col-span-3 flex flex-col gap-6'>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -378,6 +381,9 @@ export default function Home() {
                 scaleThreads(threadCount);
               }}
              />
+          </div>
+          <div className="lg:col-span-3 xl:hidden">
+            <TaskLog log={log} />
           </div>
         </div>
       </main>
