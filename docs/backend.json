@@ -46,7 +46,7 @@
       "schema": {
         "$ref": "#/entities/User"
       },
-      "description": "Stores user profile information. Path-based ownership ensures only the user (or an admin) can access their profile data."
+      "description": "Stores user profile information. A user can read/update their own profile. An admin can read/update any profile and list all users."
     },
     "/roles_admin/{userId}": {
       "schema": {

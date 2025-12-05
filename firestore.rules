@@ -103,9 +103,11 @@ service cloud.firestore {
      * @path        /users/{userId}
      */
     match /users/{userId} {
-      allow read, list: if isAdmin();
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
       allow create: if isOwner(userId) && isCreatingOwnUserDoc(userId);
-      allow update, delete: if isAdmin(); // Only admins can modify user data
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin(); // Only admins can delete user data
     }
 
     /**
