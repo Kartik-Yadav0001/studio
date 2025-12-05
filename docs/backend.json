@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user account within the Thread Weaver application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user.",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Phone number of the user."
+        },
+        "isDisabled": {
+          "type": "boolean",
+          "description": "Indicates whether the user account is disabled."
+        },
+        "customClaims": {
+          "type": "string",
+          "description": "Custom claims assigned to the user.  This could be a stringified JSON object to allow for flexibility.",
+          "format": "json"
+        }
+      },
+      "required": [
+        "id",
+        "email"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Path-based ownership ensures only the user (or an admin) can access their profile data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "role_admin",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Indicates administrative privileges for a user. The *existence* of a document at this path grants admin access. Note that the User schema is referenced here only to have a valid schema. No data from the schema are used.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who has admin privileges."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This design prioritizes security and scalability for the Thread Weaver application, especially regarding user management and thread management simulations.\n\n**Authorization Independence:** The primary focus is to eliminate `get()` calls in Firestore rules, enabling atomic operations and simplifying security.  The only exception is using existence checks on role collections (e.g., `/roles_admin/{uid}`), which is more efficient and secure than reading document data.\n\n*   **User Management:** The `/users/{userId}` collection stores user profiles. This follows path-based ownership. Administrative roles are managed via the `/roles_admin/{userId}` collection. The existence of a document at this path grants admin privileges.\n\n*   **Role-Based Access Control (RBAC):** The `/roles_admin/{userId}` collection implements a simple RBAC system. The existence of a document indicates the user is an administrator.  This is preferred over custom claims as it allows for easier auditing and management directly within Firestore.\n\n**QAPs (Rules are not Filters):** This structure supports secure `list` operations by segregating data based on access requirements.  Admin users can be identified using existence checks in the `/roles_admin` collection, enabling secure listing of all users for admin purposes.\n\n**Invariants:** The structure supports the integrity of ownership and timestamps. User IDs are embedded in the document paths (`/users/{userId}`), ensuring clear ownership. Timestamps can be managed using server timestamps."
+  }
+}

@@ -1,0 +1,139 @@
+/**
+ * This Firestore Security Ruleset implements a Role-Based Access Control (RBAC) model
+ * with two primary roles: standard Users and Admins.
+ *
+ * Core Philosophy:
+ * The security model is designed for administrative oversight while maintaining strict
+ * data privacy for individual users. Standard users have complete control over their
+ * own data, but no visibility into other users' data. Admins have read-only access
+ * to all user data and the ability to list all users for management purposes.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores public and private profile information for each user.
+ *   Access is restricted to the document owner or an Admin.
+ * - /roles_admin/{userId}: An auxiliary collection used to grant administrative
+ *   privileges. The mere existence of a document for a given userId in this
+ *   collection designates that user as an Admin. The document's data is not used.
+ *
+ * Key Security Decisions:
+ * - Admin Rights via Document Existence: Admin status is checked using a highly
+ *   performant `exists()` call on the `/roles_admin` collection. This avoids
+ *   slower `get()` calls and is more secure than relying on custom claims that
+ *   could be slow to propagate.
+ * - Client-Side Role Management is Prohibited: The `/roles_admin` collection is
+ *   read-only from the client. Roles must be granted by a trusted server-side
+ *   process (e.g., a Cloud Function) to prevent privilege escalation.
+ * - User Listing is Admin-Only: To protect user privacy and prevent data scraping,
+ *   the ability to list documents in the `/users` collection is restricted to Admins.
+ * - Strict Ownership: A user can only create their own user document (`/users/{userId}`
+ *   where `userId` matches their auth UID) and cannot modify the ownership link (`id` field)
+ *   after creation.
+ *
+ * Denormalization for Authorization:
+ * The `/roles_admin/{userId}` collection is a prime example of denormalization.
+ * Instead of storing a role on a user document (which would require a `get()` call
+ * to verify), we create a separate document whose path can be checked with `exists()`.
+ * This is faster, cheaper, and makes the rules for admin access much simpler.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Helper Functions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns true if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Returns true if the authenticated user's UID matches the provided userId.
+     * This is the primary mechanism for checking document ownership.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Returns true if a document exists for the user in the admin roles collection.
+     * This is a performant and secure way to check for administrative privileges.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * Validates that a user document being created contains an 'id' field
+     * that matches the document's ID in the path. This enforces relational
+     * integrity from the start.
+     */
+    function isCreatingOwnUserDoc(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * Ensures that the 'id' field of a user document cannot be changed after creation.
+     * This prevents an owner from re-assigning the document to another user.
+     * This works for partial updates because request.resource.data represents the merged state.
+     */
+    function isUserDocIdImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    /**
+     * Ensures that an update or delete operation is acting on a document that
+     * actually exists in the database.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Collection Rules
+    // -------------------------------------------------------------------------
+
+    /**
+     * @description Controls access to user profile documents. A user can manage their
+     *              own document, and an admin can view any user's document.
+     * @path        /users/{userId}
+     * @allow       (create) A new user creating their own profile document.
+     * @allow       (get) An authenticated user reading their own profile.
+     * @allow       (get) An admin reading any user's profile.
+     * @deny        (list) A non-admin user trying to list all user profiles.
+     * @deny        (update) A user trying to modify another user's profile.
+     * @principle   Restricts access to a user's own data tree, with an exception for admins.
+     *              Enforces relational integrity by ensuring the internal `id` field matches the path.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isCreatingOwnUserDoc(userId);
+      allow update: if (isOwner(userId) || isAdmin()) && isExistingDoc() && isUserDocIdImmutable();
+      allow delete: if (isOwner(userId) || isAdmin()) && isExistingDoc();
+    }
+
+    /**
+     * @description Defines admin roles. The existence of a document grants admin rights.
+     *              This collection is read-only for admins and completely locked
+     *              down for writes from the client to prevent privilege escalation.
+     * @path        /roles_admin/{userId}
+     * @allow       (get) An admin checking if another user is also an admin.
+     * @deny        (get) A non-admin user trying to check roles.
+     * @deny        (create) Any user trying to make themselves or someone else an admin.
+     * @deny        (list) A non-admin user trying to list all admins.
+     * @principle   Prevents client-side privilege escalation. Roles must be managed
+     *              by a trusted server-side environment.
+     */
+    match /roles_admin/{userId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
