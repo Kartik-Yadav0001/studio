@@ -22,6 +22,9 @@ export function Header() {
             <Button variant="link" asChild>
                 <Link href="/admin/functions">Functions & Logs</Link>
             </Button>
+             <Button variant="link" asChild>
+                <Link href="/admin/emulators">Emulators</Link>
+            </Button>
         </nav>
         <div className="ml-auto md:hidden">
             <Sheet>
@@ -40,6 +43,9 @@ export function Header() {
                         </Link>
                         <Link href="/admin/functions" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
                             Functions & Logs
+                        </Link>
+                        <Link href="/admin/emulators" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                            Emulators
                         </Link>
                     </nav>
                 </SheetContent>
