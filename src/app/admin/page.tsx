@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
 import { collection } from 'firebase/firestore';
 
 import { Header } from '@/components/layout/header';
@@ -10,7 +10,6 @@ import { UserTable } from '@/components/admin/user-table';
 import { EditUserDialog } from '@/components/admin/edit-user-dialog';
 
 import type { UserProfile } from '@/lib/types';
-import { FirebaseClientProvider } from '@/firebase';
 
 function AdminPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
