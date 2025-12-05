@@ -11,6 +11,7 @@ import { EditUserDialog } from '@/components/admin/edit-user-dialog';
 
 import type { UserProfile } from '@/lib/types';
 import { AdminStats } from '@/components/admin/admin-stats';
+import { AdminAuthProvider } from '@/firebase/admin-auth-provider';
 
 function AdminPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,24 +53,26 @@ function AdminPageContent() {
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
       <main className="flex-1 p-4 sm:p-6">
-        <div className="max-w-[1200px] mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Authentication Admin</h1>
-          <div className="space-y-6">
-            <AdminStats users={users || []} isLoading={isLoading} />
-            <AdminControls
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              users={users || []}
-            />
-            <UserTable 
-              users={filteredUsers} 
-              isLoading={isLoading}
-              onEditUser={handleEditUser}
-            />
+        <AdminAuthProvider>
+          <div className="max-w-[1200px] mx-auto">
+            <h1 className="text-3xl font-bold mb-6">Authentication Admin</h1>
+            <div className="space-y-6">
+              <AdminStats users={users || []} isLoading={isLoading} />
+              <AdminControls
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                users={users || []}
+              />
+              <UserTable 
+                users={filteredUsers} 
+                isLoading={isLoading}
+                onEditUser={handleEditUser}
+              />
+            </div>
           </div>
-        </div>
+        </AdminAuthProvider>
       </main>
       {editingUser && (
         <EditUserDialog 

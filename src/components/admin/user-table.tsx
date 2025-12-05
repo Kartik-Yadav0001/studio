@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { doc, updateDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 
 interface UserTableProps {
   users: UserProfile[];
@@ -34,6 +34,8 @@ interface UserTableProps {
 export function UserTable({ users, isLoading, onEditUser }: UserTableProps) {
   const { toast } = useToast();
   const firestore = useFirestore();
+  const auth = useAuth();
+
 
   const handleToggleStatus = async (user: UserProfile) => {
     if (!firestore) return;
