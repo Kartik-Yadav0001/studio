@@ -36,3 +36,12 @@ export interface LogEntry {
   message: string;
   type: 'info' | 'warning' | 'success';
 }
+
+// From backend.json
+export interface UserProfile {
+  id: string;
+  email: string | null;
+  phoneNumber?: string;
+  isDisabled: boolean;
+  customClaims?: any; // Can be a stringified JSON
+}

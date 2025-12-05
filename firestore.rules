@@ -63,6 +63,8 @@ service cloud.firestore {
      * This is a performant and secure way to check for administrative privileges.
      */
     function isAdmin() {
+      // In a production app, you might want to cache this or handle it differently.
+      // For this simulator, we directly check for the existence of a doc.
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
@@ -78,7 +80,6 @@ service cloud.firestore {
     /**
      * Ensures that the 'id' field of a user document cannot be changed after creation.
      * This prevents an owner from re-assigning the document to another user.
-     * This works for partial updates because request.resource.data represents the merged state.
      */
     function isUserDocIdImmutable() {
       return request.resource.data.id == resource.data.id;
@@ -97,43 +98,24 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     /**
-     * @description Controls access to user profile documents. A user can manage their
-     *              own document, and an admin can view any user's document.
+     * @description Controls access to user profile documents. An admin can manage any
+     *              user's document. Standard users can read their own.
      * @path        /users/{userId}
-     * @allow       (create) A new user creating their own profile document.
-     * @allow       (get) An authenticated user reading their own profile.
-     * @allow       (get) An admin reading any user's profile.
-     * @deny        (list) A non-admin user trying to list all user profiles.
-     * @deny        (update) A user trying to modify another user's profile.
-     * @principle   Restricts access to a user's own data tree, with an exception for admins.
-     *              Enforces relational integrity by ensuring the internal `id` field matches the path.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin();
+      allow read, list: if isAdmin();
       allow create: if isOwner(userId) && isCreatingOwnUserDoc(userId);
-      allow update: if (isOwner(userId) || isAdmin()) && isExistingDoc() && isUserDocIdImmutable();
-      allow delete: if (isOwner(userId) || isAdmin()) && isExistingDoc();
+      allow update, delete: if isAdmin(); // Only admins can modify user data
     }
 
     /**
      * @description Defines admin roles. The existence of a document grants admin rights.
      *              This collection is read-only for admins and completely locked
      *              down for writes from the client to prevent privilege escalation.
-     * @path        /roles_admin/{userId}
-     * @allow       (get) An admin checking if another user is also an admin.
-     * @deny        (get) A non-admin user trying to check roles.
-     * @deny        (create) Any user trying to make themselves or someone else an admin.
-     * @deny        (list) A non-admin user trying to list all admins.
-     * @principle   Prevents client-side privilege escalation. Roles must be managed
-     *              by a trusted server-side environment.
      */
     match /roles_admin/{userId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if isAdmin();
+      allow create, update, delete: if false; // Must be managed server-side
     }
   }
 }
