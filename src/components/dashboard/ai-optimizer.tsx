@@ -1,7 +1,7 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useRef } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useEffect, useRef, useMemo } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import { getRecommendedThreads } from '@/app/actions';
 import {
   Card,
@@ -46,7 +46,7 @@ export function AiOptimizer({
   threads,
   onApplyRecommendation,
 }: AiOptimizerProps) {
-  const [state, formAction] = useActionState(getRecommendedThreads, initialState);
+  const [state, formAction] = useFormState(getRecommendedThreads, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
