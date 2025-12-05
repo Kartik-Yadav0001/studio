@@ -116,7 +116,8 @@ service cloud.firestore {
      *              down for writes from the client to prevent privilege escalation.
      */
     match /roles_admin/{userId} {
-      allow get, list: if isAdmin();
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
       allow create, update, delete: if false; // Must be managed server-side
     }
   }
