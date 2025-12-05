@@ -6,6 +6,7 @@ import { EmulatorCard } from '@/components/admin/emulators/emulator-card';
 import { SnapshotManager } from '@/components/admin/emulators/snapshot-manager';
 import { Database, Shield, FunctionSquare } from 'lucide-react';
 import type { Emulator } from '@/components/admin/emulators/types';
+import { FirebaseClientProvider } from '@/firebase';
 
 const emulators: Emulator[] = [
     {
@@ -31,7 +32,8 @@ const emulators: Emulator[] = [
     },
 ];
 
-export default function EmulatorsAdminPage() {
+
+function EmulatorsAdminPageContent() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
@@ -56,4 +58,12 @@ export default function EmulatorsAdminPage() {
       </main>
     </div>
   );
+}
+
+export default function EmulatorsAdminPage() {
+    return (
+        <FirebaseClientProvider>
+            <EmulatorsAdminPageContent />
+        </FirebaseClientProvider>
+    )
 }

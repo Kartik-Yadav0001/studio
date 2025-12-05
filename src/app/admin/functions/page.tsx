@@ -4,8 +4,9 @@ import { Header } from '@/components/layout/header';
 import { FunctionsList } from '@/components/admin/functions/functions-list';
 import { LogViewer } from '@/components/admin/functions/log-viewer';
 import { AdminAuthProvider } from '@/firebase/admin-auth-provider';
+import { FirebaseClientProvider } from '@/firebase';
 
-export default function FunctionsAdminPage() {
+function FunctionsAdminPageContent() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header />
@@ -20,4 +21,12 @@ export default function FunctionsAdminPage() {
       </main>
     </div>
   );
+}
+
+export default function FunctionsAdminPage() {
+    return (
+        <FirebaseClientProvider>
+            <FunctionsAdminPageContent />
+        </FirebaseClientProvider>
+    )
 }
