@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useCollection } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
 
 import { Header } from '@/components/layout/header';
 import { AdminControls } from '@/components/admin/admin-controls';
@@ -11,8 +10,9 @@ import { UserTable } from '@/components/admin/user-table';
 import { EditUserDialog } from '@/components/admin/edit-user-dialog';
 
 import type { UserProfile } from '@/lib/types';
+import { FirebaseClientProvider } from '@/firebase';
 
-export default function AdminPage() {
+function AdminPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
@@ -79,4 +79,13 @@ export default function AdminPage() {
       )}
     </div>
   );
+}
+
+
+export default function AdminPage() {
+  return (
+    <FirebaseClientProvider>
+      <AdminPageContent />
+    </FirebaseClientProvider>
+  )
 }
