@@ -16,6 +16,9 @@ export function Header() {
             <Button variant="link" asChild>
                 <Link href="/">Simulation</Link>
             </Button>
+             <Button variant="link" asChild>
+                <Link href="/guide">Guide</Link>
+            </Button>
             <Button variant="link" asChild>
                 <Link href="/admin">Auth Admin</Link>
             </Button>
@@ -36,7 +39,10 @@ export function Header() {
                 <SheetContent side="left">
                     <nav className="grid gap-4 text-lg font-medium mt-6">
                         <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                            Home
+                            Simulation
+                        </Link>
+                        <Link href="/guide" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                            Guide
                         </Link>
                         <Link href="/admin" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
                            Auth Admin
