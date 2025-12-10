@@ -2,11 +2,7 @@
 
 A dynamic, real-time thread pool simulator for visualizing high-performance computing concepts.
 
-<!-- 
-TODO: Once your new repository is public, replace YOUR_USERNAME/YOUR_REPONAME in the badge URL below.
-e.g. https://github.com/my-cool-user/thread-weaver/actions/workflows/ci.yml
--->
-[![CI](https://github.com/YOUR_USERNAME/YOUR_REPONAME/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/YOUR_REPONAME/actions/workflows/ci.yml)
+[![CI](https://github.com/Kartik-Yadav0001/studio/actions/workflows/ci.yml/badge.svg)](https://github.com/Kartik-Yadav0001/studio/actions/workflows/ci.yml)
 
 **[Live Demo](https://your-live-demo-url-here.com)**
 
@@ -48,8 +44,8 @@ Thread Weaver provides an interactive dashboard to simulate and visualize the be
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/YOUR_USERNAME/YOUR_REPONAME.git
-    cd YOUR_REPONAME
+    git clone https://github.com/Kartik-Yadav0001/studio.git
+    cd studio
     ```
 
 2.  **Install dependencies:**
