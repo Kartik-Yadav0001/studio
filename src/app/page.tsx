@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -10,6 +11,7 @@ import { ThreadGrid } from '@/components/dashboard/thread-grid';
 import { TaskLog } from '@/components/dashboard/task-log';
 import type { PerformanceDataPoint, Resource, Task, Thread, LogEntry, TaskPriority } from '@/lib/types';
 import { SystemStats } from '@/components/dashboard/system-stats';
+import { FirebaseClientProvider } from '@/firebase';
 
 export type SimulationStatus = 'running' | 'paused' | 'stopped';
 
@@ -30,7 +32,7 @@ export type SimulationConfig = {
 const MAX_HISTORY = 30;
 const MAX_LOGS = 50;
 
-export default function Home() {
+function HomePageContent() {
   const [config, setConfig] = useState<SimulationConfig>({
     threadCount: 100,
     taskCount: 200,
@@ -389,4 +391,12 @@ export default function Home() {
       </main>
     </div>
   );
+}
+
+export default function Home() {
+    return (
+        <FirebaseClientProvider>
+            <HomePageContent />
+        </FirebaseClientProvider>
+    )
 }
