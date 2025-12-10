@@ -21,7 +21,7 @@ export default function GuidePage() {
                 <span>Thread Weaver Guide</span>
               </CardTitle>
               <CardDescription>
-                An overview of the concepts and components of the thread pool simulator.
+                An overview of the concepts and components of the thread pool simulator and admin dashboard.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -65,6 +65,40 @@ export default function GuidePage() {
                   <AccordionTrigger className="text-lg font-semibold">The AI Performance Analyst</AccordionTrigger>
                   <AccordionContent className="text-base leading-relaxed text-muted-foreground">
                     The AI Analyst uses a generative model (Gemini) to provide intelligent recommendations. It analyzes the historical performance data and the current state of the thread pool to suggest an optimal thread count. Its reasoning is based on identifying patterns of under-utilization (too many idle threads) or over-subscription (too many threads waiting for resources), helping you find the sweet spot for your configured workload.
+                  </AccordionContent>
+                </AccordionItem>
+                 <AccordionItem value="item-5">
+                  <AccordionTrigger className="text-lg font-semibold">Admin: Auth User Management</AccordionTrigger>
+                  <AccordionContent className="space-y-4 text-base leading-relaxed text-muted-foreground">
+                     <p>The Auth Admin page provides a centralized dashboard for managing all Firebase Authentication users. To access this page, you must be designated as an administrator.</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>Statistics:</strong> View key metrics at a glance, including total users, enabled vs. disabled accounts, and the number of users with special permissions (custom claims).</li>
+                        <li><strong>User Table:</strong> A comprehensive table of all registered users. You can search for specific users by their email, UID, or phone number, and filter the list by their account status.</li>
+                        <li><strong>User Actions:</strong> For each user, you can perform administrative actions such as enabling or disabling their account, sending a password reset email, or editing their custom claims to grant or revoke specific permissions.</li>
+                        <li><strong>Bulk Operations:</strong> The ability to import and export user data as a CSV file for offline analysis or bulk updates.</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-6">
+                  <AccordionTrigger className="text-lg font-semibold">Admin: Functions & Logs</AccordionTrigger>
+                  <AccordionContent className="space-y-4 text-base leading-relaxed text-muted-foreground">
+                     <p>This page gives you visibility into your backend Cloud Functions and their logs. Note that this is a placeholder UI that simulates a real production environment.</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>Deployed Functions:</strong> A list of all backend functions, showing their name, type (e.g., Flow, Callable), region, and runtime. From here, you can invoke callable functions to trigger server-side actions.</li>
+                        <li><strong>Logs Explorer:</strong> A powerful tool for inspecting server-side logs. You can search for specific log messages and apply filters based on a date range, log level (e.g., ERROR, INFO), or function name.</li>
+                        <li><strong>Saved Filters:</strong> To streamline debugging, you can save complex filter combinations as presets. This allows you to quickly access common queries, such as "Critical errors in the last 24 hours."</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+                 <AccordionItem value="item-7">
+                  <AccordionTrigger className="text-lg font-semibold">Admin: Emulator Control Panel</AccordionTrigger>
+                  <AccordionContent className="space-y-4 text-base leading-relaxed text-muted-foreground">
+                     <p>The Emulator Control Panel is your command center for managing the local Firebase development environment. It provides a user-friendly interface for tasks that would otherwise require command-line tools.</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>Emulator Management:</strong> Start and stop the individual emulators (Auth, Firestore, Functions) and see their status at a glance. You can also open the official Firebase Emulator UI for more detailed inspection.</li>
+                        <li><strong>Firestore Data:</strong> For the Firestore emulator, you can quickly clear all data to start fresh, or seed the database with a predefined set of test data.</li>
+                        <li><strong>Data Snapshots:</strong> This powerful feature allows you to save the entire state of your Firestore emulator to a file (export) and later restore it (import). This is incredibly useful for creating consistent test environments and debugging complex data-related issues.</li>
+                    </ul>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
