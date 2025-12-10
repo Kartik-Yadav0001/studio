@@ -52,51 +52,58 @@ export function EmulatorCard({ emulator }: EmulatorCardProps) {
     return (
         <Card className="flex flex-col">
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                         <Icon className="h-8 w-8 text-primary" />
-                        <CardTitle>{name}</CardTitle>
+                        <div>
+                            <CardTitle>{name}</CardTitle>
+                            <CardDescription className="mt-1">{description}</CardDescription>
+                        </div>
                     </div>
                     <Badge variant={status === 'running' ? 'default' : 'destructive'}>
                         {status === 'running' ? 'Running' : 'Stopped'}
                     </Badge>
                 </div>
-                <CardDescription>{description}</CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow space-y-2">
-                <p className="text-sm">
-                    <span className="font-semibold">Service Port:</span> <span className="font-mono text-muted-foreground">{port}</span>
-                </p>
-                {uiPort > 0 && <p className="text-sm">
-                    <span className="font-semibold">Emulator UI:</span> <span className="font-mono text-muted-foreground">{uiPort}</span>
-                </p>}
-            </CardContent>
-            <CardFooter className="flex flex-col sm:flex-row gap-2">
-                <div className="flex w-full gap-2">
-                    {status === 'stopped' ? (
-                        <Button onClick={() => handleAction('start')} className="flex-1">
-                            <Play /> Start
-                        </Button>
-                    ) : (
-                        <Button onClick={() => handleAction('stop')} variant="destructive" className="flex-1">
-                            <Square /> Stop
-                        </Button>
-                    )}
-                    {uiPort > 0 && (
-                        <Button onClick={openUi} variant="outline" disabled={status === 'stopped'}>
-                            <ExternalLink /> Open UI
-                        </Button>
-                    )}
+            <CardContent className="flex-grow space-y-4">
+                <div className='flex items-center justify-between text-sm p-3 bg-secondary/30 rounded-md'>
+                    <span className="font-semibold">Service Port:</span>
+                    <span className="font-mono text-muted-foreground">{port}</span>
                 </div>
-                {name === 'Firestore' && (
-                     <div className="flex w-full gap-2">
-                        <Button onClick={() => handleAction('seed')} variant="secondary" className="flex-1" disabled={status === 'stopped'}>
-                            <DatabaseZap /> Seed
-                        </Button>
-                        <Button onClick={() => handleAction('clear')} variant="secondary" className="flex-1" disabled={status === 'stopped'}>
-                           <Trash2 /> Clear
-                        </Button>
+                 {uiPort > 0 && (
+                    <div className='flex items-center justify-between text-sm p-3 bg-secondary/30 rounded-md'>
+                        <span className="font-semibold">Emulator UI Port:</span>
+                        <span className="font-mono text-muted-foreground">{uiPort}</span>
                     </div>
+                )}
+                {name === 'Firestore' && (
+                     <div className="space-y-2">
+                        <h4 className='text-sm font-semibold'>Data Management</h4>
+                         <div className="flex w-full gap-2">
+                            <Button onClick={() => handleAction('seed')} variant="secondary" className="flex-1" disabled={status === 'stopped'}>
+                                <DatabaseZap /> Seed Data
+                            </Button>
+                            <Button onClick={() => handleAction('clear')} variant="destructive" className="flex-1" disabled={status === 'stopped'}>
+                               <Trash2 /> Clear Data
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </CardContent>
+            <CardFooter className="flex gap-2">
+                {status === 'stopped' ? (
+                    <Button onClick={() => handleAction('start')} className="flex-1">
+                        <Play /> Start
+                    </Button>
+                ) : (
+                    <Button onClick={() => handleAction('stop')} variant="outline" className="flex-1">
+                        <Square /> Stop
+                    </Button>
+                )}
+                {uiPort > 0 && (
+                    <Button onClick={openUi} variant="secondary" disabled={status === 'stopped'} className="flex-1">
+                        <ExternalLink /> Open UI
+                    </Button>
                 )}
             </CardFooter>
         </Card>
