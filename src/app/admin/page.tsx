@@ -1,10 +1,10 @@
+
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useCollection, useFirestore, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 
-import { Header } from '@/components/layout/header';
 import { AdminControls } from '@/components/admin/admin-controls';
 import { UserTable } from '@/components/admin/user-table';
 import { EditUserDialog } from '@/components/admin/edit-user-dialog';
@@ -13,7 +13,7 @@ import type { UserProfile } from '@/lib/types';
 import { AdminStats } from '@/components/admin/admin-stats';
 import { AdminAuthProvider } from '@/firebase/admin-auth-provider';
 
-function AdminDashboard() {
+export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
@@ -50,54 +50,34 @@ function AdminDashboard() {
   };
   
   return (
-    <>
-      <div className="max-w-[1200px] mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Authentication Admin</h1>
-        <div className="space-y-6">
-          <AdminStats users={users || []} isLoading={isLoading} />
-          <AdminControls
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            users={users || []}
-          />
-          <UserTable 
-            users={filteredUsers} 
-            isLoading={isLoading}
-            onEditUser={handleEditUser}
-          />
+    <main className="flex-1 p-4 sm:p-6">
+      <AdminAuthProvider>
+        <div className="max-w-[1200px] mx-auto">
+          <h1 className="text-3xl font-bold mb-6">Authentication Admin</h1>
+          <div className="space-y-6">
+            <AdminStats users={users || []} isLoading={isLoading} />
+            <AdminControls
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              users={users || []}
+            />
+            <UserTable 
+              users={filteredUsers} 
+              isLoading={isLoading}
+              onEditUser={handleEditUser}
+            />
+          </div>
         </div>
-      </div>
-       {editingUser && (
-        <EditUserDialog 
-          user={editingUser}
-          isOpen={!!editingUser}
-          onClose={() => setEditingUser(null)}
-        />
-      )}
-    </>
-  )
-}
-
-function AdminPageContent() {
-  return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header />
-      <main className="flex-1 p-4 sm:p-6">
-        <AdminAuthProvider>
-          <AdminDashboard />
-        </AdminAuthProvider>
-      </main>
-    </div>
+         {editingUser && (
+          <EditUserDialog 
+            user={editingUser}
+            isOpen={!!editingUser}
+            onClose={() => setEditingUser(null)}
+          />
+        )}
+      </AdminAuthProvider>
+    </main>
   );
-}
-
-
-export default function AdminPage() {
-  return (
-    <FirebaseClientProvider>
-      <AdminPageContent />
-    </FirebaseClientProvider>
-  )
 }

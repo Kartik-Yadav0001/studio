@@ -2,7 +2,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Header } from '@/components/layout/header';
 import { AiOptimizer } from '@/components/dashboard/ai-optimizer';
 import { Controls } from '@/components/dashboard/controls';
 import { PerformanceChart } from '@/components/dashboard/performance-chart';
@@ -11,7 +10,6 @@ import { ThreadGrid } from '@/components/dashboard/thread-grid';
 import { TaskLog } from '@/components/dashboard/task-log';
 import type { PerformanceDataPoint, Resource, Task, Thread, LogEntry, TaskPriority } from '@/lib/types';
 import { SystemStats } from '@/components/dashboard/system-stats';
-import { FirebaseClientProvider } from '@/firebase';
 
 export type SimulationStatus = 'running' | 'paused' | 'stopped';
 
@@ -32,7 +30,7 @@ export type SimulationConfig = {
 const MAX_HISTORY = 30;
 const MAX_LOGS = 50;
 
-function HomePageContent() {
+export default function HomePage() {
   const [config, setConfig] = useState<SimulationConfig>({
     threadCount: 100,
     taskCount: 200,
@@ -344,8 +342,6 @@ function HomePageContent() {
   const throughput = simulationSeconds > 0 ? completedTasksCount / simulationSeconds : 0;
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header />
       <main className="flex-1 p-4 sm:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-[1800px] mx-auto">
           <div className='lg:col-span-1 xl:col-span-1 flex flex-col gap-6'>
@@ -389,14 +385,5 @@ function HomePageContent() {
           </div>
         </div>
       </main>
-    </div>
   );
-}
-
-export default function Home() {
-    return (
-        <FirebaseClientProvider>
-            <HomePageContent />
-        </FirebaseClientProvider>
-    )
 }

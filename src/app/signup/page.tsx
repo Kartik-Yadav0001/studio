@@ -16,12 +16,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { FirebaseClientProvider, useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { Logo } from '@/components/icons';
 
-function SignUpPageContent() {
+export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -142,13 +142,5 @@ function SignUpPageContent() {
         </form>
       </Card>
     </div>
-  );
-}
-
-export default function SignUpPage() {
-  return (
-    <FirebaseClientProvider>
-      <SignUpPageContent />
-    </FirebaseClientProvider>
   );
 }
