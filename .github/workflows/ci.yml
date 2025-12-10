@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -25,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name="Create dummy .env file"
+    - name: "Create dummy .env file"
       run: echo "GEMINI_API_KEY=dummy" > .env
 
     - name: Run linter
