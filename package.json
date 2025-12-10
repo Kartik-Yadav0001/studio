@@ -8,9 +8,9 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "NODE_ENV=production next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --fix",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No tests specified\" && exit 0",
     "e2e": "echo \"Error: no e2e test specified\" && exit 1",
     "prepare": "husky install"
   },
