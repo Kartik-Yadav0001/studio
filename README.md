@@ -70,5 +70,3 @@ Thread Weaver provides an interactive dashboard to simulate and visualize the be
     ```
 
 Open [http://localhost:9002](http://localhost:9002) in your browser to see the application.
-
-```# Thread_Management
