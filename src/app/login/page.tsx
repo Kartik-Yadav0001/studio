@@ -40,11 +40,11 @@ export default function LoginPage() {
         description: 'Redirecting you to the dashboard.',
       });
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast({
         title: 'Sign-in failed',
-        description: error.message || 'An unexpected error occurred.',
+        description: (error as Error).message || 'An unexpected error occurred.',
         variant: 'destructive',
       });
     } finally {
@@ -95,7 +95,7 @@ export default function LoginPage() {
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
             <p className="text-sm text-center text-muted-foreground">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/signup" className="underline text-primary">
                 Sign Up
               </Link>

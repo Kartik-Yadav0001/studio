@@ -25,7 +25,7 @@ interface EditUserDialogProps {
 }
 
 export function EditUserDialog({ user, isOpen, onClose }: EditUserDialogProps) {
-  const [claims, setClaims] = useState<Record<string, any>>({});
+  const [claims, setClaims] = useState<Record<string, string>>({});
   const [newKey, setNewKey] = useState('');
   const [newValue, setNewValue] = useState('');
   const { toast } = useToast();
@@ -56,10 +56,10 @@ export function EditUserDialog({ user, isOpen, onClose }: EditUserDialogProps) {
         description: `Successfully updated claims for ${user.email}.`,
       });
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error updating claims',
-        description: error.message,
+        description: (error as Error).message,
         variant: 'destructive',
       });
     }

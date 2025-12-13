@@ -210,7 +210,7 @@ export function LogViewer() {
             <ScrollArea className="flex-grow">
                 <div className="p-2 font-mono text-xs">
                     {filteredLogs.map(log => {
-                        const config = logLevelConfig[log.level];
+                        const config = logLevelConfig[log.level as LogLevel];
                         const Icon = config.icon;
                         return (
                             <div key={log.id} className="flex items-start gap-3 p-2 rounded hover:bg-secondary/50">

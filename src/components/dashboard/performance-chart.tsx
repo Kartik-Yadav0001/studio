@@ -9,9 +9,9 @@ import {
   ChartLegendContent,
 } from '@/components/ui/chart';
 import type { PerformanceDataPoint } from '@/lib/types';
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Line, ComposedChart } from 'recharts';
+import { Area, CartesianGrid, XAxis, YAxis, Line, ComposedChart } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Activity, Zap } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 const chartConfig = {
   cpuUsage: {

@@ -171,14 +171,14 @@ export default function HomePage() {
 
   const runSimulationTick = useCallback(() => {
     simulationTimeRef.current += config.simulationSpeed;
-    let { threads: currentThreads, tasks: currentTasks, resources: currentResources } = simulationStateRef.current;
+    const { threads: currentThreads, tasks: currentTasks, resources: currentResources } = simulationStateRef.current;
     
     let newThreads = JSON.parse(JSON.stringify(currentThreads)) as Thread[];
-    let newTasks = JSON.parse(JSON.stringify(currentTasks)) as Task[];
-    let newResources = JSON.parse(JSON.stringify(currentResources)) as Resource[];
+    const newTasks = JSON.parse(JSON.stringify(currentTasks)) as Task[];
+    const newResources = JSON.parse(JSON.stringify(currentResources)) as Resource[];
     let completedInTick = 0;
     
-    let threadsToRemove: number[] = [];
+    const threadsToRemove: number[] = [];
     const tasksToRequeue: Task[] = [];
 
     newThreads.forEach((thread) => {
@@ -194,13 +194,9 @@ export default function HomePage() {
             completedInTick++;
             thread.currentTaskId = null; // Mark task as done for this thread
 
-            if (thread.status === 'terminating') {
-              threadsToRemove.push(thread.id);
-              addLog(`Terminating Thread ${thread.id} after task completion.`, 'info');
-            } else {
-              thread.status = 'idle';
-              thread.progress = 0;
-            }
+            // Thread completes task and becomes idle
+            thread.status = 'idle';
+            thread.progress = 0;
             
             if (task.resourceId) {
               const resource = newResources.find((r) => r.id === task.resourceId);
@@ -213,7 +209,7 @@ export default function HomePage() {
         }
       } 
       // Handle threads marked for termination
-      else if (thread.status === 'terminating' && thread.status !== 'running') {
+      else if (thread.status === 'terminating') {
           threadsToRemove.push(thread.id);
           addLog(`Terminated idle/waiting Thread ${thread.id}.`, 'info');
           
