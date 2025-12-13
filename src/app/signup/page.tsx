@@ -66,11 +66,11 @@ export default function SignUpPage() {
         description: 'Redirecting you to the dashboard.',
       });
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast({
         title: 'Sign-up failed',
-        description: error.message || 'An unexpected error occurred.',
+        description: (error as Error).message || 'An unexpected error occurred.',
         variant: 'destructive',
       });
     } finally {

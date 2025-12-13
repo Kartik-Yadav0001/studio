@@ -51,7 +51,7 @@ function AccessDeniedCard({ uid }: { uid: string | null }) {
                         For the <strong>Document ID</strong>, paste the UID of the user you want to make an admin.
                     </li>
                     <li>
-                        You can add a field (e.g., `isAdmin: true`) but it's not required. Click <strong>Save</strong>.
+                        You can add a field (e.g., `isAdmin: true`) but it&apos;s not required. Click <strong>Save</strong>.
                     </li>
                     <li>
                         Refresh this page. The user will now have admin access.

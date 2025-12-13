@@ -43,5 +43,5 @@ export interface UserProfile {
   email: string | null;
   phoneNumber?: string;
   isDisabled: boolean;
-  customClaims?: any; // Can be a stringified JSON
+  customClaims?: string | Record<string, unknown>; // Can be a stringified JSON or object
 }

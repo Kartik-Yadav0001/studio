@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { doc, updateDoc } from 'firebase/firestore';
-import { useAuth, useFirestore } from '@/firebase';
+import { useFirestore } from '@/firebase';
 
 interface UserTableProps {
   users: UserProfile[];
@@ -34,7 +34,6 @@ interface UserTableProps {
 export function UserTable({ users, isLoading, onEditUser }: UserTableProps) {
   const { toast } = useToast();
   const firestore = useFirestore();
-  const auth = useAuth();
 
 
   const handleToggleStatus = async (user: UserProfile) => {
@@ -46,10 +45,10 @@ export function UserTable({ users, isLoading, onEditUser }: UserTableProps) {
         title: 'User status updated',
         description: `User ${user.email} has been ${!user.isDisabled ? 'disabled' : 'enabled'}.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error updating user',
-        description: error.message,
+        description: (error as Error).message,
         variant: 'destructive',
       });
     }

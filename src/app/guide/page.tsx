@@ -40,7 +40,7 @@ export default function GuidePage() {
                     <li><strong>Tasks:</strong> Sets the total number of tasks to be processed.</li>
                     <li><strong>Shared Resources:</strong> Simulates a limited number of resources (like database connections or file handles) that threads might need to complete a task. This is used to demonstrate resource contention and locking.</li>
                     <li><strong>Task Priority:</strong> Controls the mix of High, Medium, and Low priority tasks. The simulator will prioritize tasks accordingly.</li>
-                    <li><strong>Simulation Speed:</strong> Changes the duration of each "tick" of the simulation. A lower value speeds up the simulation.</li>
+                    <li><strong>Simulation Speed:</strong> Changes the duration of each &ldquo;tick&rdquo; of the simulation. A lower value speeds up the simulation.</li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -48,7 +48,7 @@ export default function GuidePage() {
               <AccordionItem value="item-3">
                 <AccordionTrigger className="text-lg font-semibold">Understanding the Dashboard</AccordionTrigger>
                 <AccordionContent className="space-y-4 text-base leading-relaxed text-muted-foreground">
-                   <p>The main dashboard provides a real-time view into the simulation's state:</p>
+                   <p>The main dashboard provides a real-time view into the simulation&apos;s state:</p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li><strong>System Stats:</strong> High-level metrics showing remaining tasks, completed tasks, and throughput (tasks per second).</li>
                     <li><strong>Performance Chart:</strong> A graph showing simulated CPU Usage, Memory Usage, and Thread Utilization over time. This helps you see the impact of your configuration changes.</li>
@@ -84,7 +84,7 @@ export default function GuidePage() {
                   <ul className="list-disc pl-6 space-y-2">
                       <li><strong>Deployed Functions:</strong> A list of all backend functions, showing their name, type (e.g., Flow, Callable), region, and runtime. From here, you can invoke callable functions to trigger server-side actions.</li>
                       <li><strong>Logs Explorer:</strong> A powerful tool for inspecting server-side logs. You can search for specific log messages and apply filters based on a date range, log level (e.g., ERROR, INFO), or function name.</li>
-                      <li><strong>Saved Filters:</strong> To streamline debugging, you can save complex filter combinations as presets. This allows you to quickly access common queries, such as "Critical errors in the last 24 hours."</li>
+                      <li><strong>Saved Filters:</strong> To streamline debugging, you can save complex filter combinations as presets. This allows you to quickly access common queries, such as &ldquo;Critical errors in the last 24 hours.&rdquo;</li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
